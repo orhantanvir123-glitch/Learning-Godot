@@ -1,0 +1,350 @@
+[gd_scene format=3 uid="uid://nfa2b1reda8e"]
+
+[ext_resource type="Texture2D" uid="uid://disayto6f0a6q" path="res://icon.svg" id="1_glv2v"]
+[ext_resource type="Texture2D" uid="uid://dy5o62q2gxfpv" path="res://triple t.jpg" id="1_uu6xs"]
+[ext_resource type="Texture2D" uid="uid://bvwe3cdmh7gby" path="res://Soldier/Soldier_Idle.png" id="3_cm0pq"]
+[ext_resource type="Texture2D" uid="uid://baw76udfmjo43" path="res://Soldier/Soldier_Attack01.png" id="4_3dxm6"]
+[ext_resource type="Texture2D" uid="uid://y4pf7g0aw7ip" path="res://Soldier/Soldier_Walk.png" id="4_fos0i"]
+
+[sub_resource type="GDScript" id="GDScript_s50pf"]
+resource_name = "main.gd"
+script/source = "extends Node2D
+
+@export var enemy = Sprite2D
+@export var player = CharacterBody2D
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	pass
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	pass
+"
+
+[sub_resource type="GDScript" id="GDScript_ugt2v"]
+resource_name = "enemy.gd"
+script/source = "extends Sprite2D
+
+@export var speed: float = 200.0
+
+func _process(delta: float) -> void:
+	position.x -= speed * delta
+	
+	if position.x < -100:
+		queue_free()
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_u6wcb"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1ckhf"]
+size = Vector2(127.778145, 140.98547)
+
+[sub_resource type="GDScript" id="GDScript_0dkek"]
+resource_name = "player.gd"
+script/source = "extends CharacterBody2D
+
+@export var death_screen: CanvasLayer
+@export var animated_sprite: AnimatedSprite2D
+
+const SPEED = 300.0
+const JUMP_VELOCITY = -600.0
+
+var is_attacking: bool = false
+
+
+func _ready() -> void:
+	if animated_sprite:
+		animated_sprite.animation_finished.connect(_on_player_animation_finished)
+
+
+func _input(event: InputEvent) -> void:
+	# animation
+	if event.is_action_pressed(\"attack\") and not is_attacking:
+		if animated_sprite:
+			is_attacking = true
+			animated_sprite.play(\"slice\")
+			animated_sprite.frame = 0
+
+
+func _physics_process(delta: float) -> void:
+	
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+
+	# jump.
+	if Input.is_action_just_pressed(\"ui_accept\") and is_on_floor():
+		velocity.y = JUMP_VELOCITY
+		
+	var direction := Input.get_axis(\"ui_left\", \"ui_right\")
+	if direction != 0:
+		velocity.x = direction * SPEED
+		if animated_sprite:
+			animated_sprite.flip_h = (direction < 0)
+	else:
+		velocity.x = move_toward(velocity.x, 0, SPEED)
+
+	if not is_attacking and animated_sprite:
+		if direction != 0:
+			animated_sprite.play(\"walk\")
+		else:
+			animated_sprite.play(\"idle\")
+
+	move_and_slide()
+
+
+func _on_animation_finished() -> void:
+	print(\"Animation finished!\")
+	if animated_sprite and animated_sprite.animation == \"slice\":
+		is_attacking = false
+
+
+func _on_area_2d_body_entered(body: Node2D) -> void:
+	if death_screen:
+		death_screen.visible = true
+	get_tree().paused = true
+
+
+func _on_player_animation_finished() -> void:
+	print(\"Animation finished!\")
+	if animated_sprite and animated_sprite.animation == \"slice\":
+		is_attacking = false
+"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1ckhf"]
+radius = 7.0655117
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3dxm6"]
+atlas = ExtResource("3_cm0pq")
+region = Rect2(0, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lgr22"]
+atlas = ExtResource("3_cm0pq")
+region = Rect2(100, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_trn2v"]
+atlas = ExtResource("3_cm0pq")
+region = Rect2(200, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_03owx"]
+atlas = ExtResource("3_cm0pq")
+region = Rect2(300, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wkp8b"]
+atlas = ExtResource("3_cm0pq")
+region = Rect2(400, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_20pc6"]
+atlas = ExtResource("3_cm0pq")
+region = Rect2(500, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2gh4u"]
+atlas = ExtResource("4_3dxm6")
+region = Rect2(0, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_devvj"]
+atlas = ExtResource("4_3dxm6")
+region = Rect2(100, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3b0ty"]
+atlas = ExtResource("4_3dxm6")
+region = Rect2(200, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bg4s2"]
+atlas = ExtResource("4_3dxm6")
+region = Rect2(300, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hhcpw"]
+atlas = ExtResource("4_3dxm6")
+region = Rect2(400, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mxvw5"]
+atlas = ExtResource("4_3dxm6")
+region = Rect2(500, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5vvyt"]
+atlas = ExtResource("4_fos0i")
+region = Rect2(0, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c6i3y"]
+atlas = ExtResource("4_fos0i")
+region = Rect2(100, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c2ibq"]
+atlas = ExtResource("4_fos0i")
+region = Rect2(200, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j4qnp"]
+atlas = ExtResource("4_fos0i")
+region = Rect2(300, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fpfj3"]
+atlas = ExtResource("4_fos0i")
+region = Rect2(400, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sc1dx"]
+atlas = ExtResource("4_fos0i")
+region = Rect2(500, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kjvhd"]
+atlas = ExtResource("4_fos0i")
+region = Rect2(600, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5tuhn"]
+atlas = ExtResource("4_fos0i")
+region = Rect2(700, 0, 100, 100)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0dkek"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3dxm6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lgr22")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_trn2v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_03owx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wkp8b")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_20pc6")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2gh4u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_devvj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3b0ty")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bg4s2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hhcpw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mxvw5")
+}],
+"loop": 1,
+"name": &"slice",
+"speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5vvyt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c6i3y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c2ibq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j4qnp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fpfj3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sc1dx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kjvhd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5tuhn")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 7.0
+}]
+
+[node name="Node2D" type="Node2D" unique_id=156287823]
+script = SubResource("GDScript_s50pf")
+
+[node name="Enemy" type="Sprite2D" parent="." unique_id=81083524]
+position = Vector2(1250, 498)
+scale = Vector2(0.27999997, 0.27999997)
+texture = ExtResource("1_uu6xs")
+script = SubResource("GDScript_ugt2v")
+
+[node name="Area2D" type="Area2D" parent="Enemy" unique_id=192256573]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Enemy/Area2D" unique_id=1102483783]
+scale = Vector2(21.428574, 22.857141)
+shape = SubResource("RectangleShape2D_u6wcb")
+
+[node name="DeathScreen" type="CanvasLayer" parent="Enemy" unique_id=1254642298]
+visible = false
+
+[node name="Panel" type="Panel" parent="Enemy/DeathScreen" unique_id=717809245]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -159.0
+offset_top = -43.0
+offset_right = -159.0
+offset_bottom = -43.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(3.395, 3.395)
+
+[node name="Label" type="Label" parent="Enemy/DeathScreen/Panel" unique_id=900995787]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "GAME OVER!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Floor" type="Sprite2D" parent="." unique_id=1408940902]
+position = Vector2(572.00006, 599)
+scale = Vector2(9.015626, 0.53906256)
+texture = ExtResource("1_glv2v")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Floor" unique_id=1999922839]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor/StaticBody2D" unique_id=780691971]
+position = Vector2(-7.6293945e-06, 5.5655518)
+shape = SubResource("RectangleShape2D_1ckhf")
+one_way_collision = true
+
+[node name="Player" type="CharacterBody2D" parent="." unique_id=1348407801 node_paths=PackedStringArray("death_screen", "animated_sprite")]
+position = Vector2(572.00006, 599)
+scale = Vector2(9.015626, 0.53906256)
+script = SubResource("GDScript_0dkek")
+death_screen = NodePath("../Enemy/DeathScreen")
+animated_sprite = NodePath("Player")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=1032672795]
+position = Vector2(-41.927223, -185.5072)
+scale = Vector2(0.6317505, 11.9775)
+shape = SubResource("CircleShape2D_1ckhf")
+
+[node name="Player" type="AnimatedSprite2D" parent="Player" unique_id=1088548694]
+texture_filter = 1
+position = Vector2(-41.927216, -150.26083)
+scale = Vector2(0.486, 8.136)
+sprite_frames = SubResource("SpriteFrames_0dkek")
+animation = &"slice"
+frame = 1
+frame_progress = 0.6902246
+
+[connection signal="body_entered" from="Enemy/Area2D" to="Player" method="_on_area_2d_body_entered"]
+[connection signal="animation_finished" from="Player/Player" to="Player" method="_on_player_animation_finished"]
